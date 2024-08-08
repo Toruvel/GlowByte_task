@@ -1,0 +1,10 @@
+CREATE TABLE T (
+  Name VARCHAR,
+  Count INT,
+  Date DATE,
+   VARCHAR,
+);
+
+insert into test_sql ()
+VALUES
+    (),
