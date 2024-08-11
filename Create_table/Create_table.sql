@@ -4,6 +4,7 @@ CREATE TABLE T (
   Date DATE,
   Subject VARCHAR,
 );
+ //AS CNT_DVOIKA
 
 insert into T (Name, Mark, Date, Subject)
 VALUES
@@ -19,3 +20,8 @@ VALUES
     ("Сидоров", 4, "06.01.2020", "изо"),
     ("Сидоров", 5, "07.01.2020", "алгебра"),
     ("Сидоров", 3, "08.01.2020", "музыка")
+
+SELECT Name, SUM(CASE WHEN Mark = 2 THEN 1 ELSE 0 END)
+FROM TABLE T
+WHERE Name IN (SELECT Name FROM TABLE T WHERE Mark  = 5 GROUP BY Name HAVING COUNT(Mark) >= 10)
+GROUP BY Name;
