@@ -2,9 +2,8 @@ CREATE TABLE T (
   Name VARCHAR,
   Mark INT,
   Date DATE,
-  Subject VARCHAR,
-);
- //AS CNT_DVOIKA
+  Subject VARCHAR );
+
 
 insert into T (Name, Mark, Date, Subject)
 VALUES
