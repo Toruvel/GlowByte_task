@@ -19,8 +19,18 @@ VALUES
     ("Сидоров", 4, "06.01.2020", "изо"),
     ("Сидоров", 5, "07.01.2020", "алгебра"),
     ("Сидоров", 3, "08.01.2020", "музыка")
-
-SELECT Name, SUM(CASE WHEN Mark = 2 THEN 1 ELSE 0 END)
-FROM TABLE T
-WHERE Name IN (SELECT Name FROM TABLE T WHERE Mark  = 5 GROUP BY Name HAVING COUNT(Mark) >= 10)
+-- Задание 1
+SELECT Name, SUM(CASE WHEN Mark = 2 THEN 1 ELSE 0 END) as Two
+FROM T
+WHERE Name IN (SELECT Name FROM T WHERE Mark  = 5 GROUP BY Name HAVING COUNT(Mark) >= 10)
 GROUP BY Name;
+
+-- Задание 2
+
+SELECT Name,
+       SUM(CASE WHEN Subject = 'Изо' THEN 1 END) as Iz,
+       SUM(CASE WHEN Subject = 'Музыка' THEN 1 END) as Mys,
+       SUM(CASE WHEN Subject = 'Алгебра' THEN 1 END) as Alg
+FROM T
+GROUP BY Name
+ORDER BY Name ASC;
