@@ -30,7 +30,10 @@ ORDER BY Name;
 
 -- Задание 2
 
-SELECT Name, Subject, COUNT(Mark) AS AllMarkCount
+SELECT
+  Name, 
+  Subject, 
+  COUNT(Mark) AS AllMarkCount
 FROM  T
 GROUP BY Name, Subject
 ORDER BY Name, Subject;
@@ -54,19 +57,29 @@ VALUES
 (2001, '2020-02-24 12:42:16', 'Оплата мобильного'),
 (2001, '2020-03-02 16:59:59', 'Оплата штрафов');
 
+-- Задача 1
+SELECT 
+    CUSTOMER_RK,
+    MIN(OPERATION_DTTM) OVER (PARTITION BY CUSTOMER_RK) AS FirstDate,
+    MAX(OPERATION_DTTM) OVER (PARTITION BY CUSTOMER_RK) AS LastDate,
+    FIRST_VALUE(OPERATION_TYPE_CD) OVER (PARTITION BY CUSTOMER_RK ORDER BY OPERATION_DTTM ASC) AS FirstType,
+    FIRST_VALUE(OPERATION_TYPE_CD) OVER (PARTITION BY CUSTOMER_RK ORDER BY OPERATION_DTTM DESC) AS LastType
+FROM Op
+ORDER BY CUSTOMER_RK;
+
+
+-- Задача 2
 
 SELECT 
     CUSTOMER_RK,
-    MIN(OPERATION_DTTM) OVER (PARTITION BY CUSTOMER_RK) AS First_Operation_Date,
-    MAX(OPERATION_DTTM) OVER (PARTITION BY CUSTOMER_RK) AS Last_Operation_Date,
-    FIRST_VALUE(OPERATION_TYPE_CD) OVER (PARTITION BY CUSTOMER_RK ORDER BY OPERATION_DTTM ASC) AS First_Operation_Type,
-    LAST_VALUE(OPERATION_TYPE_CD) OVER (PARTITION BY CUSTOMER_RK ORDER BY OPERATION_DTTM ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS Last_Operation_Type
+    OPERATION_DTTM,
+    OPERATION_TYPE_CD,
+    DATEDIFF(DAY, 
+             MAX(CASE WHEN OPERATION_TYPE_CD = 'Оплата мобильного' THEN OPERATION_DTTM END) 
+             OVER (PARTITION BY CUSTOMER_RK ORDER BY OPERATION_DTTM),
+             OPERATION_DTTM) AS Days_Since_Last_Mobile_Payment
 FROM  Op
-ORDER BY 
-    CUSTOMER_RK;
-
-
-
+ORDER BY  CUSTOMER_RK, OPERATION_DTTM;
 
 
 -- Вопрос 3
@@ -95,28 +108,29 @@ VALUES
 ('Еленина Елена Еленовна', 1500, '2021-01-04'),
 ('Еленина Елена Еленовна', 1500, '2021-01-05');
 
-with ranked as (
-select name, balance, date,
-    row_number() over (partition by name order by date) - row_number() over (partition by name, balance order by date) as groupindex
-from DayBalance
+WITH Ranked AS (
+    SELECT Name, Balance, Date,
+        ROW_NUMBER() OVER (PARTITION BY Name ORDER BY Date) - ROW_NUMBER() OVER (PARTITION BY Name, Balance ORDER BY Date) AS GroupIndex
+    FROM DayBalance
 ),
-grouped as (
-select 
-    name,
-    balance,
-    min(date) as startdate,
-    max(date) as enddate
-from ranked
-group by 
-name, balance, groupindex
+Grouped AS (
+    SELECT 
+        Name,
+        Balance,
+        MIN(date) AS StartDate,
+        MAX(date) AS EndDate
+    FROM Ranked
+    GROUP BY 
+        Name, Balance, GroupIndex
 )
-select 
-    name,
-    balance,
-    startdate,
-    case when date_add(enddate, interval 1 day) = lead(startdate) over (partition by name order by startdate) then date_add(enddate, interval 1 day) else null end as enddate
-from grouped
-order by name, startdate;
+SELECT 
+    Name,
+    Balance,
+    Startdate,
+    CASE WHEN DATE_ADD(EndDate, INTERVAL 1 DAY) = LEAD(StartDate) OVER (PARTITION BY Name ORDER BY StartDate) THEN DATE_ADD(EndDate, INTERVAL 1 DAY) ELSE NULL END AS EndDate
+FROM Grouped
+ORDER BY Name, StartDate;
+
 
 /*
 
