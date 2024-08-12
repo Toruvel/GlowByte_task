@@ -23,14 +23,12 @@ VALUES
 SELECT Name, SUM(CASE WHEN Mark = 2 THEN 1 ELSE 0 END) as Two
 FROM T
 WHERE Name IN (SELECT Name FROM T WHERE Mark  = 5 GROUP BY Name HAVING COUNT(Mark) >= 10)
-GROUP BY Name;
+GROUP BY Name
+ORDER BY Name;
 
 -- Задание 2
 
-SELECT Name,
-       SUM(CASE WHEN Subject = 'Изо' THEN 1 END) as Iz,
-       SUM(CASE WHEN Subject = 'Музыка' THEN 1 END) as Mys,
-       SUM(CASE WHEN Subject = 'Алгебра' THEN 1 END) as Alg
+SELECT  Name, Subject, COUNT(Mark) AS GradeCount
 FROM T
-GROUP BY Name
-ORDER BY Name ASC;
+GROUP BY Name, Subject
+ORDER BY Name, Subject;
